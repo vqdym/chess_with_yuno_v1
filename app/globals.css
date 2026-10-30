@@ -1,26 +1,97 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Класична дерев'яна (Wood) */
+  --board-wood-light: #f0d9b5;
+  --board-wood-dark: #b58863;
+
+  /* Зелена (Classic Emerald як на chess.com) */
+  --board-green-light: #ffffdd;
+  --board-green-dark: #86a666;
+
+  /* Синя (Ocean/Tournament) */
+  --board-blue-light: #dee3e6;
+  --board-blue-dark: #8ca2ad;
+
+  /* Сіра (Marble/Graphite) */
+  --board-gray-light: #e0e0e0;
+  --board-gray-dark: #757575;
+
+  --color-play-button: #F9E4B7;
+  --color-settings-button: #2A0E10;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Темний режим (опціонально) */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --beige-bg: #2A2724;
+    --beige-surface: #36322E;
+    --beige-panel: #45403B;
+    --beige-hover: #544E49;
+    --beige-border: #6B635C;
+    --beige-text-muted: #A39B95;
+    --beige-text: #EBE6E1;
+    --color-play-button: #F9E4B7;
+    --color-settings-button: #2A0E10;
   }
 }
 
+@theme inline {
+  --color-wood-light: var(--board-wood-light);
+  --color-wood-dark: var(--board-wood-dark);
+  
+  --color-green-light: var(--board-green-light);
+  --color-green-dark: var(--board-green-dark);
+  
+  --color-blue-light: var(--board-blue-light);
+  --color-blue-dark: var(--board-blue-dark);
+  
+  --color-gray-light: var(--board-gray-light);
+  --color-gray-dark: var(--board-gray-dark);
+
+  --color-play-button: #F9E4B7;
+  --color-settings-button: #2A0E10;
+
+  --font-cinzel: var(--font-cinzel);
+  --font-pinyon: var(--font-pinyon);
+  --font-philosopher: var(--font-philosopher);
+  --font-marckscript: var(--font-marckscript);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--beige-bg);
+  color: var(--beige-text);
   font-family: Arial, Helvetica, sans-serif;
+
+  transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+@keyframes customFadeIn {
+  0% { 
+    opacity: 0; 
+    pointer-events: none; 
+  }
+  100% { 
+    opacity: 1; 
+    pointer-events: auto; 
+  }
+}
+
+@keyframes customFadeOut {
+  0% { 
+    opacity: 1; 
+    pointer-events: auto; 
+  }
+  100% { 
+    opacity: 0; 
+    pointer-events: none; 
+  }
+}
+
+.animate-menu-show {
+  animation: customFadeIn 0.5s ease-in-out forwards;
+}
+
+.animate-menu-hide {
+  animation: customFadeOut 0.5s ease-in-out forwards;
 }

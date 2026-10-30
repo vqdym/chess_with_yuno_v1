@@ -1,0 +1,46 @@
+{
+  "menu": {
+    "playBut": "Play",
+    "settingsBut": "Setings",
+    "resumeBut": "Resume",
+    "leaveGameBut": "Leave game"
+  },
+  "settings": {
+    "title": "Settings",
+    "audio": {
+      "title": "audio",
+      "masterVolume": "master volume",
+      "music": "music",
+      "rain": "rain"
+    },
+    "chessboard": {
+    "title": "chessboard",
+    "boardTheme": "board theme",
+    "boardThemes": {
+      "wood": "wood",
+      "green": "green",
+      "blue": "blue",
+      "gray": "gray"
+      }
+    },
+    "language": {
+    "title": "language",
+    "en": "English",
+    "uk": "Ukrainian"
+    },
+    "exitBut": "apply & close"
+  },
+   "dialog": {
+  "speaker": "Yuno...",
+  "win1": "You won...? That's okay. I'm not angry. Not at you. Again?",
+  "win2": "Wow, you're so smart. I love that about you. Play with me again~",
+  "win3": "Hehe... Did you think I'd let you leave after that? One more game.",
+  "lose1": "Checkmate~ You're mine now. Isn't that wonderful?",
+  "lose2": "Don't look so sad. Just stay and play with me. Forever.",
+  "lose3": "I'll always win, you know. Because I want you so much more than you want to win.",
+  "draw1": "A draw... We're perfectly matched. It's fate, isn't it?",
+  "draw2": "Neither of us wins. So you have to stay and finish it. Right?",
+  "playAgain": "Play again",
+  "leave": "Leave..."
+}
+}

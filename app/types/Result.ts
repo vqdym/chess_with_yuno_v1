@@ -1,0 +1,1 @@
+export type Result = "playing" | "win" | "lose" | "draw";
