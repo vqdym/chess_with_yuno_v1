@@ -14,11 +14,9 @@ export function SettingsPersistence() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) dispatch(hydrateSettings(JSON.parse(raw)));
-    } catch {
-    }
+    } catch {}
     setHydrated(true);
   }, [dispatch]);
-
 
   useEffect(() => {
     if (!hydrated) return;

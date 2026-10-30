@@ -1,9 +1,23 @@
 import { DialogChoose } from "@/app/enums/DialogChoose";
 import { CAMERA_ANGLES } from "@/app/globals/globals";
+import { Difficulty } from "@/app/types/Difficulty";
 import { Result } from "@/app/types/Result";
 import {Status} from "@/app/types/Status";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Chess, Square } from "chess.js";
+
+const difficulty = {
+  "Easy": 0,
+  "Normal": 2,
+  "Tricky": 4,
+  "Challenging": 6,
+  "Hard": 8,
+  "Very hard": 10,
+  "Expert": 12,
+  "Master": 14,
+  "Nightmare": 17,
+  "Impossible": 20,
+}
 
 interface IGameScene {
   position: [number,number,number];
@@ -34,6 +48,7 @@ interface IInitialState {
   laughTrigger: number;
   hmphTrigger: number;
   is2D: boolean;
+  difficulty: number;
 }
 
 const initialState: IInitialState = {
@@ -61,6 +76,7 @@ const initialState: IInitialState = {
   laughTrigger: 0,
   hmphTrigger: 0,
   is2D: false,
+  difficulty: 2,
 }
 
 export const gameSlice = createSlice({
@@ -146,8 +162,11 @@ export const gameSlice = createSlice({
     state.result = "draw";
   }
 },
+  changeDifficulty: (state, action: PayloadAction<{difficulty: Difficulty}>) => {
+    state.difficulty = difficulty[action.payload.difficulty];
+  } 
 }
 });
 
-export const {playGame, endGame, changeStatus, changeScene, changeAngles, setHoverSquare, setSelectedSquare, setDialogTrigger, setLaughTrigger,setHmphTrigger, setIs2D, makeMove, setResult} = gameSlice.actions;
+export const {playGame, endGame, changeStatus, changeScene, changeAngles, setHoverSquare, setSelectedSquare, setDialogTrigger, setLaughTrigger,setHmphTrigger, setIs2D, makeMove, setResult, changeDifficulty} = gameSlice.actions;
 export default gameSlice.reducer;

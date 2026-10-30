@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 
 interface TypewriterProps {
   text: string;
-  speed?: number; 
+  speed?: number;
 }
 
 export function Typewriter({ text, speed = 25 }: TypewriterProps) {
@@ -21,7 +21,6 @@ export function Typewriter({ text, speed = 25 }: TypewriterProps) {
       }
     };
     typeNextChar();
-
 
     return () => clearTimeout(timeoutId);
   }, [text, speed]);

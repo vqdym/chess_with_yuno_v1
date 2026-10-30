@@ -1,8 +1,17 @@
 "use client";
 import { Canvas } from "@react-three/fiber";
-import { CameraControls, CameraControlsImpl, Environment } from "@react-three/drei";
+import {
+  CameraControls,
+  CameraControlsImpl,
+  Environment,
+} from "@react-three/drei";
 import * as THREE from "three";
-import { EffectComposer, SelectiveBloom, Vignette, Noise } from "@react-three/postprocessing";
+import {
+  EffectComposer,
+  SelectiveBloom,
+  Vignette,
+  Noise,
+} from "@react-three/postprocessing";
 import { ChessBoard } from "./ChessBoard";
 import { Restaurant } from "./Restaurant";
 import { Model as Yuno } from "../Yuno/Yuno";
@@ -13,17 +22,29 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const MAGIC_BLOOM_INTENSITY = 10;
 
 export function Scene3D() {
-  const { position, target } = useAppSelector((state) => state.gameState.gameScene);
+  const { position, target } = useAppSelector(
+    (state) => state.gameState.gameScene,
+  );
   const { status, result, is2D } = useAppSelector((state) => state.gameState);
-  const {minAzimuthAngle, maxAzimuthAngle, minPolarAngle, maxPolarAngle, minDistance, maxDistance} = useAppSelector((state) => state.gameState.cameraAngles)
+  const {
+    minAzimuthAngle,
+    maxAzimuthAngle,
+    minPolarAngle,
+    maxPolarAngle,
+    minDistance,
+    maxDistance,
+  } = useAppSelector((state) => state.gameState.cameraAngles);
   const [controls, setControls] = useState<CameraControlsImpl | null>(null);
   const [stockfishMove, setStockfishMove] = useState(0);
   const [magicMeshes, setMagicMeshes] = useState<THREE.Object3D[]>([]);
   const [bloomLights, setBloomLights] = useState<THREE.Light[]>([]);
   const registerBloomLight = useCallback((light: THREE.Light | null) => {
     if (!light) return;
-    setBloomLights((current) => current.includes(light) ? current : [...current, light]);
-    return () => setBloomLights((current) => current.filter((item) => item !== light));
+    setBloomLights((current) =>
+      current.includes(light) ? current : [...current, light],
+    );
+    return () =>
+      setBloomLights((current) => current.filter((item) => item !== light));
   }, []);
   const [isDraggingPiece, setIsDraggingPiece] = useState(false);
   const initialized = useRef(false);
@@ -51,102 +72,137 @@ export function Scene3D() {
     initialized.current = true;
   }, [controls, target, position]);
 
-  const cameraDisabled = status === "menu" || status === "paused" || result != "playing";
-  
-  return (
-    <Canvas shadows camera={{ position: position, fov: 45 }}
-    gl={{antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 0.9}}>
-      <CameraControls ref={setControls} minAzimuthAngle={minAzimuthAngle} maxAzimuthAngle={maxAzimuthAngle} minPolarAngle={minPolarAngle}
-  // Ctrl + wheel forces optical zoom in camera-controls, independently of wheel mode.
-  minZoom={1} maxZoom={1}
-  mouseButtons={{
-    left: CameraControlsImpl.ACTION.ROTATE,
-    middle: CameraControlsImpl.ACTION.DOLLY,
-    right: is2D && ctrlPressed ? CameraControlsImpl.ACTION.NONE : CameraControlsImpl.ACTION.TRUCK,
-    wheel: CameraControlsImpl.ACTION.DOLLY,
-  }}
-  maxPolarAngle={maxPolarAngle} minDistance={minDistance} maxDistance={maxDistance} makeDefault enabled={!cameraDisabled && !isDraggingPiece}/>
+  const cameraDisabled =
+    status === "menu" || status === "paused" || result != "playing";
 
+  return (
+    <Canvas
+      shadows
+      camera={{ position: position, fov: 45 }}
+      gl={{
+        antialias: true,
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 0.9,
+      }}
+    >
+      <CameraControls
+        ref={setControls}
+        minAzimuthAngle={minAzimuthAngle}
+        maxAzimuthAngle={maxAzimuthAngle}
+        minPolarAngle={minPolarAngle}
+        // Ctrl + wheel forces optical zoom in camera-controls, independently of wheel mode.
+        minZoom={1}
+        maxZoom={1}
+        mouseButtons={{
+          left: CameraControlsImpl.ACTION.ROTATE,
+          middle: CameraControlsImpl.ACTION.DOLLY,
+          right:
+            is2D && ctrlPressed
+              ? CameraControlsImpl.ACTION.NONE
+              : CameraControlsImpl.ACTION.TRUCK,
+          wheel: CameraControlsImpl.ACTION.DOLLY,
+        }}
+        maxPolarAngle={maxPolarAngle}
+        minDistance={minDistance}
+        maxDistance={maxDistance}
+        makeDefault
+        enabled={!cameraDisabled && !isDraggingPiece}
+      />
 
       <Environment preset="night" background blur={0.4} />
       <ambientLight ref={registerBloomLight} intensity={0.1} />
 
       <group rotation={[0, Math.PI / 2, 0]}>
-        
         <Restaurant />
-        <ChessBoard onDraggingChange={setIsDraggingPiece} onStockfishMove={() => setStockfishMove(n => n+1)}  />
-        
-        <pointLight ref={registerBloomLight}
-          position={[0, 12, 0]} 
-          intensity={350} 
-          distance={30} 
+        <ChessBoard
+          onDraggingChange={setIsDraggingPiece}
+          onStockfishMove={() => setStockfishMove((n) => n + 1)}
+        />
+
+        <pointLight
+          ref={registerBloomLight}
+          position={[0, 12, 0]}
+          intensity={350}
+          distance={30}
           color="#ff7722"
           castShadow
         />
 
-        <pointLight ref={registerBloomLight}
-          position={[38, 10, 0]} 
-          intensity={600} 
-          distance={30} 
+        <pointLight
+          ref={registerBloomLight}
+          position={[38, 10, 0]}
+          intensity={600}
+          distance={30}
           color="#ff7722"
           castShadow
         />
-      
-        <pointLight ref={registerBloomLight}
-          position={[36, 29, -30]} 
-          intensity={1} 
-          distance={10} 
+
+        <pointLight
+          ref={registerBloomLight}
+          position={[36, 29, -30]}
+          intensity={1}
+          distance={10}
           color="#ff7722"
           castShadow
         />
-        <pointLight ref={registerBloomLight}
-          position={[36, 29, -48.5]} 
-          intensity={1} 
-          distance={10} 
+        <pointLight
+          ref={registerBloomLight}
+          position={[36, 29, -48.5]}
+          intensity={1}
+          distance={10}
           color="#ff7722"
           castShadow
         />
-        <pointLight ref={registerBloomLight}
-          position={[18.2, 29, -30.2]} 
-          intensity={1} 
-          distance={10} 
+        <pointLight
+          ref={registerBloomLight}
+          position={[18.2, 29, -30.2]}
+          intensity={1}
+          distance={10}
           color="#ff7722"
           castShadow
         />
-         <pointLight ref={registerBloomLight}
-          position={[18.2, 29, -48.5]} 
-          intensity={1} 
-          distance={10} 
+        <pointLight
+          ref={registerBloomLight}
+          position={[18.2, 29, -48.5]}
+          intensity={1}
+          distance={10}
           color="#ff7722"
           castShadow
         />
-        <pointLight ref={registerBloomLight}
-          position={[0.2, 29, -30.2]} 
-          intensity={1} 
-          distance={10} 
+        <pointLight
+          ref={registerBloomLight}
+          position={[0.2, 29, -30.2]}
+          intensity={1}
+          distance={10}
           color="#ff7722"
           castShadow
         />
-        <pointLight ref={registerBloomLight}
-          position={[0.2, 29, -48.5]} 
-          intensity={1} 
-          distance={10} 
+        <pointLight
+          ref={registerBloomLight}
+          position={[0.2, 29, -48.5]}
+          intensity={1}
+          distance={10}
           color="#ff7722"
           castShadow
         />
- 
-      <Yuno moveTrigger={stockfishMove} onMagicMeshesReady={setMagicMeshes} position={[11.65, -11, 0]} scale={15} rotation={[0, -1.6, 0]} />
+
+        <Yuno
+          moveTrigger={stockfishMove}
+          onMagicMeshesReady={setMagicMeshes}
+          position={[11.65, -11, 0]}
+          scale={15}
+          rotation={[0, -1.6, 0]}
+        />
       </group>
       <EffectComposer>
-
         <SelectiveBloom
           // Inverted selection excludes only Yuno's FX meshes from bloom.
           selection={magicMeshes}
           inverted
           lights={bloomLights}
-          intensity={10} 
-          luminanceThreshold={0.3} 
-          luminanceSmoothing={0.7} 
+          intensity={10}
+          luminanceThreshold={0.3}
+          luminanceSmoothing={0.7}
         />
 
         <SelectiveBloom
@@ -163,7 +219,6 @@ export function Scene3D() {
 
         <Noise opacity={0.01} />
       </EffectComposer>
-
     </Canvas>
   );
 }

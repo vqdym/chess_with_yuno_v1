@@ -1,12 +1,14 @@
-"use client"
-import YouTube from 'react-youtube';
+"use client";
+import YouTube from "react-youtube";
 import { useAppSelector } from "@/store/hooks";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export function BackgroundAudio() {
-  const {masterVolume, musicVolume, rainVolume} = useAppSelector(state => state.settings)
-  const status = useAppSelector(state => state.gameState.status);
-  
+  const { masterVolume, musicVolume, rainVolume } = useAppSelector(
+    (state) => state.settings,
+  );
+  const status = useAppSelector((state) => state.gameState.status);
+
   const jazzId = "MYPVQccHhAQ";
   const rainId = "XhAhviQaxpQ";
 
@@ -15,19 +17,19 @@ export function BackgroundAudio() {
 
   const handleReadyJazz = (event: any) => {
     setJazzPlayer(event.target);
-    event.target.setVolume(musicVolume * masterVolume / 100);
-    event.target.playVideo();
-  };
-  
-  const handleReadyRain = (event: any) => {
-    setRainPlayer(event.target);
-    event.target.setVolume(rainVolume * masterVolume / 100); 
+    event.target.setVolume((musicVolume * masterVolume) / 100);
     event.target.playVideo();
   };
 
-useEffect(() => {
+  const handleReadyRain = (event: any) => {
+    setRainPlayer(event.target);
+    event.target.setVolume((rainVolume * masterVolume) / 100);
+    event.target.playVideo();
+  };
+
+  useEffect(() => {
     try {
-      if (jazzPlayer && typeof jazzPlayer.setVolume === 'function') {
+      if (jazzPlayer && typeof jazzPlayer.setVolume === "function") {
         jazzPlayer.setVolume((musicVolume * masterVolume) / 100);
       }
     } catch (error) {
@@ -37,7 +39,7 @@ useEffect(() => {
 
   useEffect(() => {
     try {
-      if (rainPlayer && typeof rainPlayer.setVolume === 'function') {
+      if (rainPlayer && typeof rainPlayer.setVolume === "function") {
         rainPlayer.setVolume((rainVolume * masterVolume) / 100);
       }
     } catch (error) {
@@ -47,33 +49,32 @@ useEffect(() => {
 
   return (
     <div className="hidden pointer-events-none">
-      <YouTube 
+      <YouTube
         videoId={jazzId}
         opts={{
           playerVars: {
             autoplay: 1,
             loop: 1,
             controls: 0,
-            playlist: jazzId, 
+            playlist: jazzId,
           },
-        }} 
+        }}
         onReady={handleReadyJazz}
-        
       />
-      {status !== "menu" &&
-      <YouTube 
-      videoId={rainId} 
-      opts={{
-        playerVars: {
-          autoplay: 1,
-          loop: 1,
-          controls: 0,
-          playlist: rainId, 
-        },
-      }} 
-      onReady={handleReadyRain}
-      />
-    }
+      {status !== "menu" && (
+        <YouTube
+          videoId={rainId}
+          opts={{
+            playerVars: {
+              autoplay: 1,
+              loop: 1,
+              controls: 0,
+              playlist: rainId,
+            },
+          }}
+          onReady={handleReadyRain}
+        />
+      )}
     </div>
   );
 }

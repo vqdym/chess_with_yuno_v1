@@ -7,7 +7,6 @@ import { SwitchCamera } from "./components/SwitchCamera";
 import { TestComp } from "./components/TestComp";
 
 export default function Home() {
-  
   return (
     <main className="relative w-screen bg-beige-surface h-screen overflow-hidden">
       <LoadingScreen />
@@ -22,7 +21,7 @@ export default function Home() {
         <Dialogs />
       </div>
       <div className="absolute z-10 bottom-4 right-4">
-      <SwitchCamera />
+        <SwitchCamera />
       </div>
       <div className="absolute inset-0 z-0">
         <Scene3D />
