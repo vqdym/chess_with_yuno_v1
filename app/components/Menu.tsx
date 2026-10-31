@@ -13,11 +13,14 @@ import {
   setMusicVolume,
   setRainVolume,
   setVoiceEffectsVolume,
+  setGraphicsQuality,
+  setShowFps,
 } from "@/store/settingsSlice";
 import { GAME_SCENE } from "../globals/globals";
 import { useT } from "../hooks/useT";
 import { DifficultySlider } from "./DifficultySlider";
 import type { Theme } from "../types/Theme";
+import { GRAPHICS_LEVELS, isGraphicsQuality } from "../globals/graphics";
 
 const BOARD_THEMES = ["wood", "green", "blue", "gray"] as const;
 const LANGUAGE_LABELS: Record<Language, string> = {
@@ -28,7 +31,7 @@ const LANGUAGE_LABELS: Record<Language, string> = {
 export function Menu() {
   const t = useT();
   const dispatch = useAppDispatch();
-  const { masterVolume, musicVolume, rainVolume, voiceEffectsVolume, boardTheme, language } =
+  const { masterVolume, musicVolume, rainVolume, voiceEffectsVolume, boardTheme, language, graphicsQuality, showFps } =
     useAppSelector((state) => state.settings);
   const status = useAppSelector((state) => state.gameState.status);
   const result = useAppSelector((state) => state.gameState.result);
@@ -126,6 +129,28 @@ export function Menu() {
               </h2>
 
               <div className="flex flex-col gap-8 z-10 flex-1 min-h-0 overflow-y-auto pr-3 [scrollbar-width:thin] [scrollbar-color:rgba(249,228,183,0.4)_transparent]">
+                <section className="flex flex-col gap-4" aria-labelledby="graphics-heading">
+                  <h3 id="graphics-heading" className={`text-[24px] ${serifFont} uppercase font-bold tracking-widest border-b border-play-button/20 pb-2 mb-2 text-white/90`}>
+                    {t("settings.graphics.title")}
+                  </h3>
+                  <div className="flex justify-between items-center gap-4">
+                    <label htmlFor="graphics-quality" className={`${serifFont} text-[18px] tracking-wide`}>
+                      {t("settings.graphics.quality")}
+                    </label>
+                    <select id="graphics-quality" value={graphicsQuality}
+                      onChange={(event) => {
+                        if (isGraphicsQuality(event.target.value)) dispatch(setGraphicsQuality(event.target.value));
+                      }}
+                      className={`w-[200px] bg-settings-button border border-play-button/30 rounded px-3 py-1 ${serifFont} text-play-button cursor-pointer focus:outline-none focus:border-play-button`}>
+                      {GRAPHICS_LEVELS.map((level) => <option key={level} value={level}>{t(`settings.graphics.levels.${level}`)}</option>)}
+                    </select>
+                  </div>
+                  <p className="text-sm text-play-button/75">{t(`settings.graphics.descriptions.${graphicsQuality}`)}</p>
+                  <label className={`flex justify-between items-center ${serifFont} text-[18px]`}>
+                    {t("settings.graphics.showFps")}
+                    <input type="checkbox" checked={showFps} onChange={(event) => dispatch(setShowFps(event.target.checked))} className="h-4 w-4 accent-play-button" />
+                  </label>
+                </section>
                 <div className="flex flex-col gap-4">
                   <h3
                     className={`text-[24px] ${serifFont} uppercase font-bold tracking-widest border-b border-play-button/20 pb-2 mb-2 text-white/90`}

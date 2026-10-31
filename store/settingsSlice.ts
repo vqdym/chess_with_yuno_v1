@@ -1,4 +1,5 @@
 import type { Theme } from "@/app/types/Theme";
+import { isGraphicsQuality, type GraphicsQuality } from "@/app/globals/graphics";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 export const LANGUAGES = ["en", "uk"] as const;
@@ -11,6 +12,8 @@ interface SettingsState {
   rainVolume: number;
   voiceEffectsVolume: number;
   language: Language;
+  graphicsQuality: GraphicsQuality;
+  showFps: boolean;
 }
 
 const initialState: SettingsState = {
@@ -20,6 +23,8 @@ const initialState: SettingsState = {
   rainVolume: 35,
   voiceEffectsVolume: 100,
   language: "en",
+  graphicsQuality: "medium",
+  showFps: false,
 } 
 
 const settingsSlice = createSlice({
@@ -39,7 +44,17 @@ const settingsSlice = createSlice({
       state.rainVolume = action.payload.rainVolume;
     },
     hydrateSettings: (state, action: PayloadAction<Partial<SettingsState>>)=>{
-      return {...state, ...action.payload};
+      return {
+        ...state, ...action.payload,
+        graphicsQuality: isGraphicsQuality(action.payload.graphicsQuality) ? action.payload.graphicsQuality : state.graphicsQuality,
+        showFps: typeof action.payload.showFps === "boolean" ? action.payload.showFps : state.showFps,
+      };
+    },
+    setGraphicsQuality: (state, action: PayloadAction<GraphicsQuality>) => {
+      if (isGraphicsQuality(action.payload)) state.graphicsQuality = action.payload;
+    },
+    setShowFps: (state, action: PayloadAction<boolean>) => {
+      state.showFps = action.payload;
     },
     setVoiceEffectsVolume: (state, action: PayloadAction<{voiceEffectsVolume: number}>) => {
       state.voiceEffectsVolume = action.payload.voiceEffectsVolume;
@@ -50,5 +65,5 @@ const settingsSlice = createSlice({
   }
 })
 
-export const {setBoardTheme, setMasterVolume, setMusicVolume, setRainVolume, setVoiceEffectsVolume, hydrateSettings, setLanguage} = settingsSlice.actions;
+export const {setBoardTheme, setMasterVolume, setMusicVolume, setRainVolume, setVoiceEffectsVolume, hydrateSettings, setLanguage, setGraphicsQuality, setShowFps} = settingsSlice.actions;
 export default settingsSlice.reducer;

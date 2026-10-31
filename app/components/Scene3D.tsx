@@ -4,7 +4,6 @@ import {
   CameraControls,
   CameraControlsImpl,
   Environment,
-  PerformanceMonitor,
 } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -19,6 +18,8 @@ import { Model as Yuno } from "../Yuno/Yuno";
 import { useAppSelector } from "@/store/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePageVisible } from "../hooks/usePageVisible";
+import { GRAPHICS_PRESETS } from "../globals/graphics";
+import { FpsCounter } from "./FpsCounter";
 
 // Ring halo only: 0 disables it; raise gradually for a stronger glow.
 const MAGIC_BLOOM_INTENSITY = 10;
@@ -31,8 +32,9 @@ export function Scene3D() {
   const result = useAppSelector((state) => state.gameState.result);
   const is2D = useAppSelector((state) => state.gameState.is2D);
   const visible = usePageVisible();
-  const [quality, setQuality] = useState(2);
-  const lowerQuality = useCallback(() => setQuality((level) => Math.max(0, level - 1)), []);
+  const graphicsQuality = useAppSelector((state) => state.settings.graphicsQuality);
+  const showFps = useAppSelector((state) => state.settings.showFps);
+  const quality = GRAPHICS_PRESETS[graphicsQuality];
   const {
     minAzimuthAngle,
     maxAzimuthAngle,
@@ -85,8 +87,8 @@ export function Scene3D() {
 
   return (
     <Canvas
-      shadows={quality > 0}
-      dpr={quality === 2 ? 1 : quality === 1 ? 0.85 : 0.65}
+      shadows={quality.shadows}
+      dpr={quality.dpr}
       frameloop={visible ? "always" : "never"}
       camera={{ position: position, fov: 45 }}
       gl={{
@@ -95,15 +97,7 @@ export function Scene3D() {
         toneMappingExposure: 0.9,
       }}
     >
-      {visible && quality > 0 && (
-        <PerformanceMonitor
-          key={quality}
-          bounds={() => [40, 55]}
-          ms={500}
-          iterations={10}
-          onDecline={lowerQuality}
-        />
-      )}
+      {visible && showFps && <FpsCounter key={graphicsQuality} />}
       <CameraControls
         ref={setControls}
         minAzimuthAngle={minAzimuthAngle}
@@ -139,12 +133,15 @@ export function Scene3D() {
         />
 
         <pointLight
+          key={quality.shadowSize}
           ref={registerBloomLight}
           position={[0, 12, 0]}
           intensity={350}
           distance={30}
           color="#ff7722"
           castShadow
+          shadow-mapSize-width={quality.shadowSize}
+          shadow-mapSize-height={quality.shadowSize}
         />
 
         <pointLight
@@ -206,7 +203,7 @@ export function Scene3D() {
           rotation={[0, -1.6, 0]}
         />
       </group>
-      {quality === 2 && <EffectComposer multisampling={0}>
+      {quality.effects && <EffectComposer multisampling={quality.samples}>
         <SelectiveBloom
           // Inverted selection excludes only Yuno's FX meshes from bloom.
           selection={magicMeshes}
@@ -215,7 +212,7 @@ export function Scene3D() {
           intensity={10}
           luminanceThreshold={0.3}
           luminanceSmoothing={0.7}
-          resolutionScale={0.5}
+          resolutionScale={quality.bloomScale}
         />
 
         <SelectiveBloom
@@ -226,7 +223,7 @@ export function Scene3D() {
           intensity={MAGIC_BLOOM_INTENSITY}
           luminanceThreshold={0.1}
           luminanceSmoothing={0.2}
-          resolutionScale={0.5}
+          resolutionScale={quality.bloomScale}
         />
 
         <Vignette eskil={false} offset={0.3} darkness={0.6} />

@@ -6,6 +6,19 @@
     "leaveGameBut": "Leave game"
   },
   "settings": {
+    "graphics": {
+      "title": "Graphics",
+      "quality": "Quality",
+      "showFps": "Show FPS",
+      "levels": { "ultraLow": "Ultra Low", "low": "Low", "medium": "Medium", "high": "High", "ultra": "Ultra" },
+      "descriptions": {
+        "ultraLow": "Maximum performance: 50% render resolution, no shadows or glow.",
+        "low": "75% render resolution, no shadows or glow.",
+        "medium": "Balanced: 100% render resolution and shadows, no glow.",
+        "high": "100% render resolution, shadows and glow effects.",
+        "ultra": "150% render resolution, sharper shadows and higher-quality glow. Requires a powerful GPU."
+      }
+    },
     "title": "Settings",
     "audio": {
       "title": "audio",
