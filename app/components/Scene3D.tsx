@@ -11,8 +11,9 @@ import {
   Bloom,
   SelectiveBloom,
   Vignette,
-  Noise,
+  ToneMapping,
 } from "@react-three/postprocessing";
+import { ToneMappingMode } from "postprocessing";
 import { ChessBoard } from "./ChessBoard";
 import { Restaurant } from "./Restaurant";
 import { Model as Yuno } from "../Yuno/Yuno";
@@ -22,8 +23,15 @@ import { usePageVisible } from "../hooks/usePageVisible";
 import { GRAPHICS_PRESETS } from "../globals/graphics";
 import { FpsSampler } from "./FpsCounter";
 
-// Ring halo only: 0 disables it; raise gradually for a stronger glow.
 const MAGIC_BLOOM_INTENSITY = 10;
+const LAMP_POSITIONS: [number, number, number][] = [
+  [36, 29, -30],
+  [36, 29, -48.5],
+  [18.2, 29, -30.2],
+  [18.2, 29, -48.5],
+  [0.2, 29, -30.2],
+  [0.2, 29, -48.5],
+];
 
 export function Scene3D() {
   const { position, target } = useAppSelector(
@@ -77,7 +85,6 @@ export function Scene3D() {
 
   useEffect(() => {
     if (!controls) return;
-    // Also reset zoom left over from Ctrl + wheel before these limits were applied.
     controls.zoomTo(1, false);
     controls.setLookAt(...position, ...target, initialized.current);
     initialized.current = true;
@@ -104,7 +111,6 @@ export function Scene3D() {
         minAzimuthAngle={minAzimuthAngle}
         maxAzimuthAngle={maxAzimuthAngle}
         minPolarAngle={minPolarAngle}
-        // Ctrl + wheel forces optical zoom in camera-controls, independently of wheel mode.
         minZoom={1}
         maxZoom={1}
         mouseButtons={{
@@ -123,8 +129,9 @@ export function Scene3D() {
         enabled={!cameraDisabled && !isDraggingPiece}
       />
 
-      <Environment preset="night" background blur={0.4} />
-      <ambientLight ref={registerBloomLight} intensity={0.1} />
+      <Environment preset="night" background blur={0.5} />
+      <ambientLight ref={registerBloomLight} intensity={0.18} color="#ffe4c4" />
+      <hemisphereLight ref={registerBloomLight} args={["#ffe6c7", "#493025", 0.25]} />
 
       <group rotation={[0, Math.PI / 2, 0]}>
         <Restaurant />
@@ -153,48 +160,17 @@ export function Scene3D() {
           color="#ff7722"
         />
 
-        <pointLight
-          ref={registerBloomLight}
-          position={[36, 29, -30]}
-          intensity={1}
-          distance={10}
-          color="#ff7722"
-        />
-        <pointLight
-          ref={registerBloomLight}
-          position={[36, 29, -48.5]}
-          intensity={1}
-          distance={10}
-          color="#ff7722"
-        />
-        <pointLight
-          ref={registerBloomLight}
-          position={[18.2, 29, -30.2]}
-          intensity={1}
-          distance={10}
-          color="#ff7722"
-        />
-        <pointLight
-          ref={registerBloomLight}
-          position={[18.2, 29, -48.5]}
-          intensity={1}
-          distance={10}
-          color="#ff7722"
-        />
-        <pointLight
-          ref={registerBloomLight}
-          position={[0.2, 29, -30.2]}
-          intensity={1}
-          distance={10}
-          color="#ff7722"
-        />
-        <pointLight
-          ref={registerBloomLight}
-          position={[0.2, 29, -48.5]}
-          intensity={1}
-          distance={10}
-          color="#ff7722"
-        />
+        {LAMP_POSITIONS.map((position, index) => (
+          <pointLight
+            key={`ceiling-lamp-${index}`}
+            ref={registerBloomLight}
+            position={position}
+            color="#ff7722"
+            intensity={1}
+            distance={10}
+            castShadow={false}
+          />
+        ))}
 
         <Yuno
           moveTrigger={stockfishMove}
@@ -206,8 +182,6 @@ export function Scene3D() {
       </group>
       {quality.effects && <EffectComposer multisampling={quality.samples}>
         <Bloom
-          // Glow only HDR highlights, not the whites of the eyes. Ordinary
-          // bloom also avoids a second selective scene/depth render.
           intensity={0.6}
           luminanceThreshold={1}
           luminanceSmoothing={0.1}
@@ -225,9 +199,8 @@ export function Scene3D() {
           resolutionScale={quality.bloomScale}
         />
 
-        <Vignette eskil={false} offset={0.3} darkness={0.6} />
-
-        <Noise opacity={0.01} />
+        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+        <Vignette eskil={false} offset={0.25} darkness={0.35} />
       </EffectComposer>}
     </Canvas>
   );

@@ -1,10 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Piece } from "./Piece";
+import { BoardTiles } from "./BoardTiles";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Chess, Move, type Square } from "chess.js";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { CHESS_MATERIAL } from "../globals/globals";
 import { makeMove, setHoverSquare, setSelectedSquare } from "@/store/gameSlice";
 import { CapturedVisual } from "../types/CapturedVisual";
 import { CapturedPiece } from "./CapturedPiece";
@@ -370,7 +370,7 @@ export function ChessBoard({
   const hoverColor =
     HOVER_THEMES[boardTheme as keyof typeof HOVER_THEMES] || HOVER_THEMES.wood;
   const board = useMemo(() => game.board(), [game]);
-  const squares = [];
+  const squareColors: string[] = [];
   const chess: ReactNode[] = [];
 
   for (let row = 0; row < 8; row++) {
@@ -378,45 +378,12 @@ export function ChessBoard({
       const square = `${String.fromCharCode(97 + col)}${8 - row}` as Square;
       const isLightSquare = (row + col) % 2 === 0;
       const isLegalMove = legalMoves?.some((move) => move.to === square);
-      const position: [number, number, number] = [col - 3.5, 0.05, row - 3.5];
-      const isPointHere = square == hoverSquare;
-      squares.push(
-        <mesh
-          name={square}
-          userData={{ square }}
-          key={square}
-          position={position}
-          receiveShadow
-          onClick={(event) => {
-            event.stopPropagation();
-            handleSquareClick(square);
-          }}
-        >
-          <boxGeometry args={[1, 0.1, 1]} />
-          <meshPhysicalMaterial
-            ref={(material) => {
-              materialRefs.current[row * 8 + col] = material;
-            }}
-            color={
-              square === selectedSquare
-                ? "#e6c84f"
-                : isPointHere
-                  ? hoverColor
-                  : isLegalMove && isLightSquare
-                    ? selectedTheme.light
-                    : isLegalMove && !isLightSquare
-                      ? selectedTheme.dark
-                      : isLightSquare
-                        ? theme.light
-                        : theme.dark
-            }
-            roughness={CHESS_MATERIAL.roughness}
-            metalness={CHESS_MATERIAL.metalness}
-            clearcoat={CHESS_MATERIAL.clearcoat}
-            clearcoatRoughness={CHESS_MATERIAL.clearcoatRoughness}
-            reflectivity={CHESS_MATERIAL.reflectivity}
-          />
-        </mesh>,
+      const isPointHere = square === hoverSquare;
+      squareColors.push(
+        square === selectedSquare ? "#e6c84f"
+          : isPointHere ? hoverColor
+          : isLegalMove ? (isLightSquare ? selectedTheme.light : selectedTheme.dark)
+          : isLightSquare ? theme.light : theme.dark,
       );
     }
   }
@@ -491,7 +458,8 @@ export function ChessBoard({
         {borderMaterial}
       </mesh>
 
-      <group>{squares}</group>
+      <BoardTiles colors={squareColors} onSelect={handleSquareClick}
+        onMaterial={(material) => { materialRefs.current[0] = material; }} />
       <group>{chess}</group>
       {capturedVisual && (
         <CapturedPiece

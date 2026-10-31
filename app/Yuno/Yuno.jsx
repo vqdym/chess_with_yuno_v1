@@ -163,6 +163,13 @@ export function Model({ moveTrigger = 0, onMagicMeshesReady, ...props }) {
     // Traverse the mounted group so the FX meshes are actually found.
     group.current?.traverse((object) => {
       if (!object.isMesh) return
+      // Animated/morphed face parts can leave their bind-pose bounds. Avoid
+      // culling individual facial meshes when the camera tilts down.
+      if (object.isSkinnedMesh && object.name.startsWith('Face_')) object.frustumCulled = false
+      // These coplanar transparent layers must not swap order as the camera moves.
+      if (object.name === 'Face_5') object.renderOrder = 10 // eye white
+      if (object.name === 'Face_2') object.renderOrder = 11 // iris
+      if (object.name === 'Face_3') object.renderOrder = 12 // highlight
       const original = object.material
       const entries = Array.isArray(original) ? original : [original]
       if (!entries.some((material) => material.name.startsWith('FX_'))) return
