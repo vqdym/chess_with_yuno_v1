@@ -12,10 +12,12 @@ import {
   setMasterVolume,
   setMusicVolume,
   setRainVolume,
+  setVoiceEffectsVolume,
 } from "@/store/settingsSlice";
 import { GAME_SCENE } from "../globals/globals";
 import { useT } from "../hooks/useT";
 import { DifficultySlider } from "./DifficultySlider";
+import type { Theme } from "../types/Theme";
 
 const BOARD_THEMES = ["wood", "green", "blue", "gray"] as const;
 const LANGUAGE_LABELS: Record<Language, string> = {
@@ -26,7 +28,7 @@ const LANGUAGE_LABELS: Record<Language, string> = {
 export function Menu() {
   const t = useT();
   const dispatch = useAppDispatch();
-  const { masterVolume, musicVolume, rainVolume, boardTheme, language } =
+  const { masterVolume, musicVolume, rainVolume, voiceEffectsVolume, boardTheme, language } =
     useAppSelector((state) => state.settings);
   const status = useAppSelector((state) => state.gameState.status);
   const result = useAppSelector((state) => state.gameState.result);
@@ -193,6 +195,25 @@ export function Menu() {
                       className="w-[200px] h-1 bg-play-button/20 rounded-lg appearance-none cursor-pointer accent-play-button"
                     />
                   </div>
+                  <div className="flex justify-between items-center group">
+                    <label
+                      htmlFor="voice-effects-volume"
+                      className={`${serifFont} text-[18px] tracking-wide transition-colors group-hover:text-white`}
+                    >
+                      {t("settings.audio.voiceEffects")}
+                    </label>
+                    <input
+                      id="voice-effects-volume"
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={voiceEffectsVolume}
+                      onChange={(e) =>
+                        dispatch(setVoiceEffectsVolume({ voiceEffectsVolume: Number(e.target.value) }))
+                      }
+                      className="w-[200px] h-1 bg-play-button/20 rounded-lg appearance-none cursor-pointer accent-play-button"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -212,7 +233,7 @@ export function Menu() {
                       onChange={(e) =>
                         dispatch(
                           setBoardTheme({
-                            boardTheme: e.target.value as ITheme,
+                            boardTheme: e.target.value as Theme,
                           }),
                         )
                       }

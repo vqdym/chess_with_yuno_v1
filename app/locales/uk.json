@@ -11,7 +11,8 @@
       "title": "Звук",
       "masterVolume": "Загальна гучність",
       "music": "Музика",
-      "rain": "Звук дощу"
+      "rain": "Звук дощу",
+      "voiceEffects": "Голосові ефекти"
     },
     "chessboard": {
     "title": "Шахівниця",

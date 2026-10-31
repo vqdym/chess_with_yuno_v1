@@ -11,7 +11,8 @@
       "title": "audio",
       "masterVolume": "master volume",
       "music": "music",
-      "rain": "rain"
+      "rain": "rain",
+      "voiceEffects": "Voice effects"
     },
     "chessboard": {
     "title": "chessboard",

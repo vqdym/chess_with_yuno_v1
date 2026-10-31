@@ -1,14 +1,15 @@
-import { ITheme } from "@/app/types/Theme";
+import type { Theme } from "@/app/types/Theme";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
 export const LANGUAGES = ["en", "uk"] as const;
 export type Language = (typeof LANGUAGES)[number];
 
 interface SettingsState {
-  boardTheme: ITheme;
+  boardTheme: Theme;
   masterVolume: number;
   musicVolume: number;
   rainVolume: number;
+  voiceEffectsVolume: number;
   language: Language;
 }
 
@@ -17,6 +18,7 @@ const initialState: SettingsState = {
   masterVolume: 100,
   musicVolume: 60,
   rainVolume: 35,
+  voiceEffectsVolume: 100,
   language: "en",
 } 
 
@@ -24,7 +26,7 @@ const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    setBoardTheme: (state: SettingsState, action: PayloadAction<{boardTheme: ITheme}>) => {
+    setBoardTheme: (state: SettingsState, action: PayloadAction<{boardTheme: Theme}>) => {
       state.boardTheme = action.payload.boardTheme;
     },
     setMasterVolume: (state: SettingsState, action: PayloadAction<{masterVolume: number}>) => {
@@ -39,11 +41,14 @@ const settingsSlice = createSlice({
     hydrateSettings: (state, action: PayloadAction<Partial<SettingsState>>)=>{
       return {...state, ...action.payload};
     },
+    setVoiceEffectsVolume: (state, action: PayloadAction<{voiceEffectsVolume: number}>) => {
+      state.voiceEffectsVolume = action.payload.voiceEffectsVolume;
+    },
     setLanguage: (state, action: PayloadAction<{ language: Language }>) => {
       state.language = action.payload.language;
     },
   }
 })
 
-export const {setBoardTheme, setMasterVolume, setMusicVolume, setRainVolume, hydrateSettings, setLanguage} = settingsSlice.actions;
+export const {setBoardTheme, setMasterVolume, setMusicVolume, setRainVolume, setVoiceEffectsVolume, hydrateSettings, setLanguage} = settingsSlice.actions;
 export default settingsSlice.reducer;

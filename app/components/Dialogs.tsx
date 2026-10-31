@@ -15,7 +15,7 @@ import { Button } from "./Button";
 import { DialogWindow } from "./DialogWindow";
 import { GAME_SCENE } from "../globals/globals";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Typewriter } from "./Typewritter";
 import { DialogChoose } from "../enums/DialogChoose";
 
@@ -24,31 +24,46 @@ const LAUGH_SOUNDS = 11;
 const HMPH_SOUNDS = 2;
 const LAUGH_FADE_OUT_SECONDS = 1.5;
 
+function applyVoiceVolume(audio: HTMLAudioElement, volume: number, fade: boolean) {
+  const fadeFactor = fade && Number.isFinite(audio.duration)
+    ? Math.max(0, Math.min(1, (audio.duration - audio.currentTime) / LAUGH_FADE_OUT_SECONDS))
+    : 1;
+  audio.volume = volume * fadeFactor;
+}
+
 export function Dialogs() {
   const t = useT();
   const dispatch = useAppDispatch();
   const result = useAppSelector((s) => s.gameState.result);
+  const { masterVolume, voiceEffectsVolume } = useAppSelector((s) => s.settings);
+  const voiceVolume = Math.max(0, Math.min(1, masterVolume * voiceEffectsVolume / 10000));
+  const volumeRef = useRef(voiceVolume);
+  const laughRef = useRef<HTMLAudioElement | null>(null);
+  const hmphRef = useRef<HTMLAudioElement | null>(null);
   const [endDialog, setEndDialog] = useState<{
     result: keyof typeof VARIANTS;
     variant: number;
   } | null>(null);
 
   useEffect(() => {
+    volumeRef.current = voiceVolume;
+    if (laughRef.current) applyVoiceVolume(laughRef.current, voiceVolume, true);
+    if (hmphRef.current) applyVoiceVolume(hmphRef.current, voiceVolume, false);
+  }, [voiceVolume]);
+
+  useEffect(() => {
     if (result === "playing") return;
     let audio: HTMLAudioElement | undefined;
     let hmph: HTMLAudioElement | undefined;
     const fadeOut = () => {
-      if (!audio || !Number.isFinite(audio.duration)) return;
-      const secondsLeft = audio.duration - audio.currentTime;
-      audio.volume = Math.max(
-        0,
-        Math.min(1, secondsLeft / LAUGH_FADE_OUT_SECONDS),
-      );
+      if (audio) applyVoiceVolume(audio, volumeRef.current, true);
     };
     if (result === "lose") {
       dispatch(setLaughTrigger(1));
       const randomSound = Math.floor(Math.random() * LAUGH_SOUNDS) + 1;
       audio = new Audio(`/sounds/laugh/laugh-${randomSound}.mp3`);
+      laughRef.current = audio;
+      applyVoiceVolume(audio, volumeRef.current, true);
       audio.addEventListener("timeupdate", fadeOut);
       audio
         .play()
@@ -58,6 +73,8 @@ export function Dialogs() {
       dispatch(setHmphTrigger(1));
       const randomSound = Math.floor(Math.random() * HMPH_SOUNDS) + 1;
       hmph = new Audio(`/sounds/hmph/hmph_${randomSound}.mp3`);
+      hmphRef.current = hmph;
+      applyVoiceVolume(hmph, volumeRef.current, false);
       hmph.play().catch((error) => console.warn("Could not play hmph:", error));
     }
     let dialogAudio: HTMLAudioElement | undefined;
@@ -88,12 +105,19 @@ export function Dialogs() {
     return () => {
       clearTimeout(id);
       dispatch(setLaughTrigger(0));
+      dispatch(setHmphTrigger(0));
       dispatch(setDialogTrigger(DialogChoose.Playing));
       if (audio) {
         audio.removeEventListener("timeupdate", fadeOut);
         audio.pause();
         audio.currentTime = 0;
       }
+      if (hmph) {
+        hmph.pause();
+        hmph.currentTime = 0;
+      }
+      laughRef.current = null;
+      hmphRef.current = null;
       if (dialogAudio) {
         dialogAudio.pause();
         dialogAudio.currentTime = 0;
