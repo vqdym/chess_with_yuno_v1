@@ -8,6 +8,7 @@ import {
 import * as THREE from "three";
 import {
   EffectComposer,
+  Bloom,
   SelectiveBloom,
   Vignette,
   Noise,
@@ -19,7 +20,7 @@ import { useAppSelector } from "@/store/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePageVisible } from "../hooks/usePageVisible";
 import { GRAPHICS_PRESETS } from "../globals/graphics";
-import { FpsCounter } from "./FpsCounter";
+import { FpsSampler } from "./FpsCounter";
 
 // Ring halo only: 0 disables it; raise gradually for a stronger glow.
 const MAGIC_BLOOM_INTENSITY = 10;
@@ -87,7 +88,7 @@ export function Scene3D() {
 
   return (
     <Canvas
-      shadows={quality.shadows}
+      shadows="percentage"
       dpr={quality.dpr}
       frameloop={visible ? "always" : "never"}
       camera={{ position: position, fov: 45 }}
@@ -97,7 +98,7 @@ export function Scene3D() {
         toneMappingExposure: 0.9,
       }}
     >
-      {visible && showFps && <FpsCounter key={graphicsQuality} />}
+      {visible && showFps && <FpsSampler key={graphicsQuality} />}
       <CameraControls
         ref={setControls}
         minAzimuthAngle={minAzimuthAngle}
@@ -139,7 +140,7 @@ export function Scene3D() {
           intensity={350}
           distance={30}
           color="#ff7722"
-          castShadow
+          castShadow={quality.shadows}
           shadow-mapSize-width={quality.shadowSize}
           shadow-mapSize-height={quality.shadowSize}
         />
@@ -204,14 +205,12 @@ export function Scene3D() {
         />
       </group>
       {quality.effects && <EffectComposer multisampling={quality.samples}>
-        <SelectiveBloom
-          // Inverted selection excludes only Yuno's FX meshes from bloom.
-          selection={magicMeshes}
-          inverted
-          lights={bloomLights}
-          intensity={10}
-          luminanceThreshold={0.3}
-          luminanceSmoothing={0.7}
+        <Bloom
+          // Glow only HDR highlights, not the whites of the eyes. Ordinary
+          // bloom also avoids a second selective scene/depth render.
+          intensity={0.6}
+          luminanceThreshold={1}
+          luminanceSmoothing={0.1}
           resolutionScale={quality.bloomScale}
         />
 

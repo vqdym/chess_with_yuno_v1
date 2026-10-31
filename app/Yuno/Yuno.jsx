@@ -112,7 +112,21 @@ export function Model({ moveTrigger = 0, onMagicMeshesReady, ...props }) {
   const materials = React.useMemo(() => {
     return Object.fromEntries(
       Object.entries(sourceMaterials).map(([name, material]) => {
-        const fixedMaterial = material.clone()
+        // Small eye layers should retain their painted colour without extra
+        // physical/transmission passes or dependence on bloom exposure.
+        const isEye = /EyeIris|EyeHighlight|EyeWhite/.test(name)
+        const fixedMaterial = isEye
+          ? new THREE.MeshBasicMaterial({
+              name: material.name,
+              map: material.map,
+              color: material.color,
+              side: material.side,
+              transparent: true,
+              depthWrite: false,
+              alphaTest: 0.01,
+              toneMapped: false,
+            })
+          : material.clone()
         if (name.startsWith('FX_')) {
           fixedMaterial.emissiveIntensity = MAGIC_FX_INTENSITY
           fixedMaterial.transparent = true
@@ -120,11 +134,19 @@ export function Model({ moveTrigger = 0, onMagicMeshesReady, ...props }) {
           fixedMaterial.depthWrite = false
           fixedMaterial.alphaTest = 0.05
           fixedMaterial.alphaToCoverage = false
+        } else if (isEye) {
+          // Eye layers overlap: opaque depth writes hide the iris/white behind them.
+          fixedMaterial.transparent = true
+          fixedMaterial.depthWrite = false
+          fixedMaterial.alphaTest = 0.01
+          fixedMaterial.alphaToCoverage = false
         } else {
           fixedMaterial.transparent = false
           fixedMaterial.depthWrite = true
           fixedMaterial.alphaTest = 0.5
-          fixedMaterial.alphaToCoverage = true
+          // Alpha coverage depends on the active render target's MSAA samples.
+          // Use the same cutout path with and without postprocessing.
+          fixedMaterial.alphaToCoverage = false
         }
         if ('transmission' in fixedMaterial) fixedMaterial.transmission = 0
         fixedMaterial.needsUpdate = true

@@ -4,6 +4,7 @@ import { LoadingScreen } from "./components/LoadingScreen";
 import { Menu } from "./components/Menu";
 import { Scene3D } from "./components/Scene3D";
 import { SwitchCamera } from "./components/SwitchCamera";
+import { FpsCounter } from "./components/FpsCounter";
 import { TestComp } from "./components/TestComp";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
     <main className="relative w-screen bg-beige-surface h-screen overflow-hidden">
       <LoadingScreen />
       <BackgroundAudio />
+      <FpsCounter />
       {/* <div className="absolute inset-0 z-10">
       <TestComp />
       </div> */}
