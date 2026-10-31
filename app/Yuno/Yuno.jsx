@@ -88,7 +88,9 @@ export function Model({ moveTrigger = 0, onMagicMeshesReady, ...props }) {
   const dialogTrigger = useAppSelector(state => state.gameState.dialogTrigger);
   const laughTrigger = useAppSelector(state => state.gameState.laughTrigger);
   const hmphTrigger = useAppSelector(state => state.gameState.hmphTrigger);
-  const { status, result, gameId } = useAppSelector(state => state.gameState)
+  const status = useAppSelector(state => state.gameState.status)
+  const result = useAppSelector(state => state.gameState.result)
+  const gameId = useAppSelector(state => state.gameState.gameId)
   const isPlaying = status === 'started' && result === 'playing'
   const isDialog = status === 'started' && result !== 'playing' && dialogTrigger !== DialogChoose.Playing
   const activeIdle = React.useRef(null)
@@ -349,6 +351,7 @@ export function Model({ moveTrigger = 0, onMagicMeshesReady, ...props }) {
 
     const system = particleRuntime.current
     if (!system) return
+    if (state.sparks.length === 0 && system.geometry.drawRange.count === 0) return
     const { positions, colors, geometry } = system
     let count = 0
     for (let i = state.sparks.length - 1; i >= 0; i--) {

@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Piece } from "./Piece";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Chess, Move, type Square } from "chess.js";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -71,6 +71,13 @@ export function ChessBoard({
   const angleRef = useRef(playerTurn === 0 ? -Math.PI / 2 : Math.PI / 2);
   const dragOffset = useRef<[number, number]>([0, 0]);
   const materialRefs = useRef<(THREE.MeshPhysicalMaterial | null)[]>([]);
+  const materialAnimationActive = useRef(true);
+  const materialTargets = useMemo(() => ({
+    roughness, metalness, clearcoat, clearcoatRoughness, reflectivity,
+  }), [roughness, metalness, clearcoat, clearcoatRoughness, reflectivity]);
+  useEffect(() => {
+    materialAnimationActive.current = true;
+  }, [materialTargets]);
 
   useFrame((_, delta) => {
     if (!boardRef.current) return;
@@ -88,13 +95,9 @@ export function ChessBoard({
     boardRef.current.rotation.y = angleRef.current;
   });
   useFrame((_, delta) => {
-    const targets = {
-      roughness,
-      metalness,
-      clearcoat,
-      clearcoatRoughness,
-      reflectivity,
-    };
+    if (!materialAnimationActive.current) return;
+    const targets = materialTargets;
+    let settled = true;
 
     for (const material of materialRefs.current) {
       if (!material) continue;
@@ -129,9 +132,17 @@ export function ChessBoard({
         2,
         delta,
       );
+      for (const key of Object.keys(targets) as (keyof typeof targets)[]) {
+        if (Math.abs(material[key] - targets[key]) < 0.001) {
+          material[key] = targets[key];
+        } else {
+          settled = false;
+        }
+      }
     }
+    materialAnimationActive.current = !settled;
   });
-  const game = new Chess(fen);
+  const game = useMemo(() => new Chess(fen), [fen]);
   const playerColor = playerTurn === 0 ? "w" : "b";
   const canPlayerMove =
     status === "started" &&
@@ -198,9 +209,9 @@ export function ChessBoard({
     },
   });
 
-  const legalMoves: Move[] = selectedSquare
+  const legalMoves: Move[] = useMemo(() => selectedSquare
     ? game.moves({ square: selectedSquare, verbose: true })
-    : [];
+    : [], [game, selectedSquare]);
 
   function handleSquareClick(square: Square) {
     if (!canPlayerMove) return;
@@ -358,7 +369,7 @@ export function ChessBoard({
     SELECTED_THEMES.wood;
   const hoverColor =
     HOVER_THEMES[boardTheme as keyof typeof HOVER_THEMES] || HOVER_THEMES.wood;
-  const board = game.board();
+  const board = useMemo(() => game.board(), [game]);
   const squares = [];
   const chess: ReactNode[] = [];
 
@@ -420,7 +431,6 @@ export function ChessBoard({
       const colorName = piece.color === "w" ? "White" : "Black";
       const square =
         `${String.fromCharCode(97 + colIndex)}${8 - rowIndex}` as Square;
-      const isTo = lastMove?.to == square;
       chess.push(
         <Piece
           animateFrom={

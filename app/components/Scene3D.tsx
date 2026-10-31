@@ -4,6 +4,7 @@ import {
   CameraControls,
   CameraControlsImpl,
   Environment,
+  PerformanceMonitor,
 } from "@react-three/drei";
 import * as THREE from "three";
 import {
@@ -17,6 +18,7 @@ import { Restaurant } from "./Restaurant";
 import { Model as Yuno } from "../Yuno/Yuno";
 import { useAppSelector } from "@/store/hooks";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePageVisible } from "../hooks/usePageVisible";
 
 // Ring halo only: 0 disables it; raise gradually for a stronger glow.
 const MAGIC_BLOOM_INTENSITY = 10;
@@ -25,7 +27,12 @@ export function Scene3D() {
   const { position, target } = useAppSelector(
     (state) => state.gameState.gameScene,
   );
-  const { status, result, is2D } = useAppSelector((state) => state.gameState);
+  const status = useAppSelector((state) => state.gameState.status);
+  const result = useAppSelector((state) => state.gameState.result);
+  const is2D = useAppSelector((state) => state.gameState.is2D);
+  const visible = usePageVisible();
+  const [quality, setQuality] = useState(2);
+  const lowerQuality = useCallback(() => setQuality((level) => Math.max(0, level - 1)), []);
   const {
     minAzimuthAngle,
     maxAzimuthAngle,
@@ -36,6 +43,7 @@ export function Scene3D() {
   } = useAppSelector((state) => state.gameState.cameraAngles);
   const [controls, setControls] = useState<CameraControlsImpl | null>(null);
   const [stockfishMove, setStockfishMove] = useState(0);
+  const onStockfishMove = useCallback(() => setStockfishMove((n) => n + 1), []);
   const [magicMeshes, setMagicMeshes] = useState<THREE.Object3D[]>([]);
   const [bloomLights, setBloomLights] = useState<THREE.Light[]>([]);
   const registerBloomLight = useCallback((light: THREE.Light | null) => {
@@ -77,7 +85,9 @@ export function Scene3D() {
 
   return (
     <Canvas
-      shadows
+      shadows={quality > 0}
+      dpr={quality === 2 ? 1 : quality === 1 ? 0.85 : 0.65}
+      frameloop={visible ? "always" : "never"}
       camera={{ position: position, fov: 45 }}
       gl={{
         antialias: true,
@@ -85,6 +95,15 @@ export function Scene3D() {
         toneMappingExposure: 0.9,
       }}
     >
+      {visible && quality > 0 && (
+        <PerformanceMonitor
+          key={quality}
+          bounds={() => [40, 55]}
+          ms={500}
+          iterations={10}
+          onDecline={lowerQuality}
+        />
+      )}
       <CameraControls
         ref={setControls}
         minAzimuthAngle={minAzimuthAngle}
@@ -116,7 +135,7 @@ export function Scene3D() {
         <Restaurant />
         <ChessBoard
           onDraggingChange={setIsDraggingPiece}
-          onStockfishMove={() => setStockfishMove((n) => n + 1)}
+          onStockfishMove={onStockfishMove}
         />
 
         <pointLight
@@ -134,7 +153,6 @@ export function Scene3D() {
           intensity={600}
           distance={30}
           color="#ff7722"
-          castShadow
         />
 
         <pointLight
@@ -143,7 +161,6 @@ export function Scene3D() {
           intensity={1}
           distance={10}
           color="#ff7722"
-          castShadow
         />
         <pointLight
           ref={registerBloomLight}
@@ -151,7 +168,6 @@ export function Scene3D() {
           intensity={1}
           distance={10}
           color="#ff7722"
-          castShadow
         />
         <pointLight
           ref={registerBloomLight}
@@ -159,7 +175,6 @@ export function Scene3D() {
           intensity={1}
           distance={10}
           color="#ff7722"
-          castShadow
         />
         <pointLight
           ref={registerBloomLight}
@@ -167,7 +182,6 @@ export function Scene3D() {
           intensity={1}
           distance={10}
           color="#ff7722"
-          castShadow
         />
         <pointLight
           ref={registerBloomLight}
@@ -175,7 +189,6 @@ export function Scene3D() {
           intensity={1}
           distance={10}
           color="#ff7722"
-          castShadow
         />
         <pointLight
           ref={registerBloomLight}
@@ -183,7 +196,6 @@ export function Scene3D() {
           intensity={1}
           distance={10}
           color="#ff7722"
-          castShadow
         />
 
         <Yuno
@@ -194,7 +206,7 @@ export function Scene3D() {
           rotation={[0, -1.6, 0]}
         />
       </group>
-      <EffectComposer>
+      {quality === 2 && <EffectComposer multisampling={0}>
         <SelectiveBloom
           // Inverted selection excludes only Yuno's FX meshes from bloom.
           selection={magicMeshes}
@@ -203,6 +215,7 @@ export function Scene3D() {
           intensity={10}
           luminanceThreshold={0.3}
           luminanceSmoothing={0.7}
+          resolutionScale={0.5}
         />
 
         <SelectiveBloom
@@ -213,12 +226,13 @@ export function Scene3D() {
           intensity={MAGIC_BLOOM_INTENSITY}
           luminanceThreshold={0.1}
           luminanceSmoothing={0.2}
+          resolutionScale={0.5}
         />
 
         <Vignette eskil={false} offset={0.3} darkness={0.6} />
 
         <Noise opacity={0.01} />
-      </EffectComposer>
+      </EffectComposer>}
     </Canvas>
   );
 }
