@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setGpuWarning } from "@/store/settingsSlice";
+import { Button } from "./Button";
 
 export function GPUWarning({ t }: { t: (key: string) => string }) {
   const gpuWarning = useAppSelector((state) => state.settings.gpuWarning);
@@ -18,12 +19,12 @@ export function GPUWarning({ t }: { t: (key: string) => string }) {
 
         <p className="mt-3 text-sm text-zinc-400">{t("gpuWarning.advice")}</p>
 
-        <button
+        <Button
           onClick={() => dispatch(setGpuWarning(undefined))}
-          className="mt-4 rounded-lg bg-white px-4 py-2 text-black"
+          style="mt-4 rounded-lg cursor-pointer bg-white px-4 py-2 text-black"
         >
           {t("gpuWarning.continue")}
-        </button>
+        </Button>
       </div>
     </div>
   );
