@@ -48,6 +48,8 @@ const settingsSlice = createSlice({
     hydrateSettings: (state, action: PayloadAction<Partial<SettingsState>>)=>{
       return {
         ...state, ...action.payload,
+        // Detection belongs to the current WebGL context, never saved settings.
+        gpuWarning: state.gpuWarning,
         graphicsQuality: isGraphicsQuality(action.payload.graphicsQuality) ? action.payload.graphicsQuality : state.graphicsQuality,
         showFps: typeof action.payload.showFps === "boolean" ? action.payload.showFps : state.showFps,
       };

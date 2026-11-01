@@ -21,7 +21,8 @@ export function SettingsPersistence() {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      // Also removes warnings written by older versions on the next save.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...settings, gpuWarning: undefined }));
     } catch {}
   }, [settings, hydrated]);
 

@@ -5,6 +5,12 @@
     "resumeBut": "Resume",
     "leaveGameBut": "Leave game"
   },
+  "gpuWarning": {
+    "title": "Integrated graphics may be in use",
+    "renderer": "Your browser reports this graphics renderer:",
+    "advice": "If you have a dedicated GPU and the game runs slowly, try selecting it for your browser in your system's graphics settings (on Windows: Settings → System → Display → Graphics). You can also lower the graphics quality in the game settings.",
+    "continue": "Continue"
+  },
   "settings": {
     "graphics": {
       "title": "Graphics",

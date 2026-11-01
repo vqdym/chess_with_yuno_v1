@@ -95,23 +95,23 @@ export function Menu() {
       {gpuWarning && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <div className="rounded-xl bg-zinc-900 p-6 text-white">
-            <h2 className="text-xl font-bold">Integrated GPU detected</h2>
+            <h2 className="text-xl font-bold">{t("gpuWarning.title")}</h2>
 
             <p className="mt-3">
-              Your browser appears to be using:
+              {t("gpuWarning.renderer")}
               <br />
               {gpuWarning}
             </p>
 
             <p className="mt-3 text-sm text-zinc-400">
-              Try enabling your dedicated GPU in Windows Graphics Settings.
+              {t("gpuWarning.advice")}
             </p>
 
             <button
-              onClick={() => dispatch(setGpuWarning(""))}
+              onClick={() => dispatch(setGpuWarning(undefined))}
               className="mt-4 rounded-lg bg-white px-4 py-2 text-black"
             >
-              Continue
+              {t("gpuWarning.continue")}
             </button>
           </div>
         </div>

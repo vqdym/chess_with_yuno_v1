@@ -15,7 +15,10 @@ export function GPUDetector() {
       "WEBGL_debug_renderer_info"
     );
 
-    if (!extension) return;
+    if (!extension) {
+      dispatch(setGpuWarning(undefined));
+      return;
+    }
 
     const gpuName = String(
       context.getParameter(
@@ -23,15 +26,13 @@ export function GPUDetector() {
       )
     );
 
-    console.log("Current GPU:", gpuName);
-
-    const isIntegrated =
+    // Renderer names are only a heuristic. An unmatched name is unknown,
+    // not proof that the browser is using a dedicated GPU.
+    const isLikelyIntegrated =
       /Intel.*(UHD|HD Graphics|Iris)/i.test(gpuName) ||
       /AMD Radeon\(TM\) Graphics/i.test(gpuName);
 
-    if (isIntegrated) {
-      dispatch(setGpuWarning(gpuName));
-    }
+    dispatch(setGpuWarning(isLikelyIntegrated ? gpuName : undefined));
   }, [gl, dispatch]);
 
   return null;
