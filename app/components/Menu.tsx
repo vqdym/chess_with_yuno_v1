@@ -22,6 +22,7 @@ import { useT } from "../hooks/useT";
 import { DifficultySlider } from "./DifficultySlider";
 import type { Theme } from "../types/Theme";
 import { GRAPHICS_LEVELS, isGraphicsQuality } from "../globals/graphics";
+import { GPUWarning } from "./GPUWarning";
 
 const BOARD_THEMES = ["wood", "green", "blue", "gray"] as const;
 const LANGUAGE_LABELS: Record<Language, string> = {
@@ -92,30 +93,7 @@ export function Menu() {
     <div
       className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center z-50 ${isMenuHidden ? "opacity-0 invisible" : "opacity-100 visible"} transition duration-300 ease-in-out`}
     >
-      {gpuWarning && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="rounded-xl bg-zinc-900 p-6 text-white">
-            <h2 className="text-xl font-bold">{t("gpuWarning.title")}</h2>
-
-            <p className="mt-3">
-              {t("gpuWarning.renderer")}
-              <br />
-              {gpuWarning}
-            </p>
-
-            <p className="mt-3 text-sm text-zinc-400">
-              {t("gpuWarning.advice")}
-            </p>
-
-            <button
-              onClick={() => dispatch(setGpuWarning(undefined))}
-              className="mt-4 rounded-lg bg-white px-4 py-2 text-black"
-            >
-              {t("gpuWarning.continue")}
-            </button>
-          </div>
-        </div>
-      )}
+      <GPUWarning t={t} />
       <div className="absolute top-[15%]">
         <h1
           className={`text-white text-[96px] font-pinyon [text-shadow:0_4px_8px_rgba(42,14,16,0.8)]`}
