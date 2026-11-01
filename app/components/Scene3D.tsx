@@ -22,6 +22,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePageVisible } from "../hooks/usePageVisible";
 import { GRAPHICS_PRESETS } from "../globals/graphics";
 import { FpsSampler } from "./FpsCounter";
+import { GPUDetector } from "./GPUDetector";
 
 const MAGIC_BLOOM_INTENSITY = 10;
 const LAMP_POSITIONS: [number, number, number][] = [
@@ -41,8 +42,11 @@ export function Scene3D() {
   const result = useAppSelector((state) => state.gameState.result);
   const is2D = useAppSelector((state) => state.gameState.is2D);
   const visible = usePageVisible();
-  const graphicsQuality = useAppSelector((state) => state.settings.graphicsQuality);
+  const graphicsQuality = useAppSelector(
+    (state) => state.settings.graphicsQuality,
+  );
   const showFps = useAppSelector((state) => state.settings.showFps);
+  const [gpuWarning, setGpuWarning] = useState("");
   const quality = GRAPHICS_PRESETS[graphicsQuality];
   const {
     minAzimuthAngle,
@@ -106,6 +110,7 @@ export function Scene3D() {
         powerPreference: "high-performance",
       }}
     >
+      <GPUDetector onIntegratedGPU={setGpuWarning} />
       {visible && showFps && <FpsSampler key={graphicsQuality} />}
       <CameraControls
         ref={setControls}
@@ -129,10 +134,36 @@ export function Scene3D() {
         makeDefault
         enabled={!cameraDisabled && !isDraggingPiece}
       />
+      {gpuWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="rounded-xl bg-zinc-900 p-6 text-white">
+            <h2 className="text-xl font-bold">Integrated GPU detected</h2>
 
+            <p className="mt-3">
+              Your browser appears to be using:
+              <br />
+              {gpuWarning}
+            </p>
+
+            <p className="mt-3 text-sm text-zinc-400">
+              Try enabling your dedicated GPU in Windows Graphics Settings.
+            </p>
+
+            <button
+              onClick={() => setGpuWarning("")}
+              className="mt-4 rounded-lg bg-white px-4 py-2 text-black"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
       <Environment preset="night" background blur={0.5} />
       <ambientLight ref={registerBloomLight} intensity={0.18} color="#ffe4c4" />
-      <hemisphereLight ref={registerBloomLight} args={["#ffe6c7", "#493025", 0.25]} />
+      <hemisphereLight
+        ref={registerBloomLight}
+        args={["#ffe6c7", "#493025", 0.25]}
+      />
 
       <group rotation={[0, Math.PI / 2, 0]}>
         <Restaurant />
@@ -181,28 +212,30 @@ export function Scene3D() {
           rotation={[0, -1.6, 0]}
         />
       </group>
-      {quality.effects && <EffectComposer multisampling={quality.samples}>
-        <Bloom
-          intensity={0.6}
-          luminanceThreshold={1}
-          luminanceSmoothing={0.1}
-          resolutionScale={quality.bloomScale}
-        />
+      {quality.effects && (
+        <EffectComposer multisampling={quality.samples}>
+          <Bloom
+            intensity={0.6}
+            luminanceThreshold={1}
+            luminanceSmoothing={0.1}
+            resolutionScale={quality.bloomScale}
+          />
 
-        <SelectiveBloom
-          selection={magicMeshes}
-          selectionLayer={11}
-          lights={bloomLights}
-          ignoreBackground
-          intensity={MAGIC_BLOOM_INTENSITY}
-          luminanceThreshold={0.1}
-          luminanceSmoothing={0.2}
-          resolutionScale={quality.bloomScale}
-        />
+          <SelectiveBloom
+            selection={magicMeshes}
+            selectionLayer={11}
+            lights={bloomLights}
+            ignoreBackground
+            intensity={MAGIC_BLOOM_INTENSITY}
+            luminanceThreshold={0.1}
+            luminanceSmoothing={0.2}
+            resolutionScale={quality.bloomScale}
+          />
 
-        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        <Vignette eskil={false} offset={0.25} darkness={0.35} />
-      </EffectComposer>}
+          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+          <Vignette eskil={false} offset={0.25} darkness={0.35} />
+        </EffectComposer>
+      )}
     </Canvas>
   );
 }
