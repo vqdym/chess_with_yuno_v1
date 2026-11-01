@@ -103,6 +103,7 @@ export function Scene3D() {
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 0.9,
+        powerPreference: "high-performance",
       }}
     >
       {visible && showFps && <FpsSampler key={graphicsQuality} />}
