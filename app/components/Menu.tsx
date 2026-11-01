@@ -15,7 +15,6 @@ import {
   setVoiceEffectsVolume,
   setGraphicsQuality,
   setShowFps,
-  setGpuWarning,
 } from "@/store/settingsSlice";
 import { GAME_SCENE } from "../globals/globals";
 import { useT } from "../hooks/useT";
@@ -25,11 +24,6 @@ import { GRAPHICS_LEVELS, isGraphicsQuality } from "../globals/graphics";
 import { GPUWarning } from "./GPUWarning";
 
 const BOARD_THEMES = ["wood", "green", "blue", "gray"] as const;
-const LANGUAGE_LABELS: Record<Language, string> = {
-  en: "English",
-  uk: "Українська",
-};
-
 export function Menu() {
   const t = useT();
   const dispatch = useAppDispatch();
@@ -45,7 +39,6 @@ export function Menu() {
   } = useAppSelector((state) => state.settings);
   const status = useAppSelector((state) => state.gameState.status);
   const result = useAppSelector((state) => state.gameState.result);
-  const gpuWarning = useAppSelector((state) => state.settings.gpuWarning);
 
   const [buttonMode, setButtonMode] = useState<"play" | "leave">("play");
 
@@ -67,7 +60,7 @@ export function Menu() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [status, dispatch]);
+  }, [status, dispatch, result]);
 
   const handlePlayClick = () => {
     dispatch(
