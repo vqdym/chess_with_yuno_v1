@@ -15,6 +15,7 @@ import {
   setVoiceEffectsVolume,
   setGraphicsQuality,
   setShowFps,
+  setGpuWarning,
 } from "@/store/settingsSlice";
 import { GAME_SCENE } from "../globals/globals";
 import { useT } from "../hooks/useT";
@@ -31,10 +32,19 @@ const LANGUAGE_LABELS: Record<Language, string> = {
 export function Menu() {
   const t = useT();
   const dispatch = useAppDispatch();
-  const { masterVolume, musicVolume, rainVolume, voiceEffectsVolume, boardTheme, language, graphicsQuality, showFps } =
-    useAppSelector((state) => state.settings);
+  const {
+    masterVolume,
+    musicVolume,
+    rainVolume,
+    voiceEffectsVolume,
+    boardTheme,
+    language,
+    graphicsQuality,
+    showFps,
+  } = useAppSelector((state) => state.settings);
   const status = useAppSelector((state) => state.gameState.status);
   const result = useAppSelector((state) => state.gameState.result);
+  const gpuWarning = useAppSelector((state) => state.settings.gpuWarning);
 
   const [buttonMode, setButtonMode] = useState<"play" | "leave">("play");
 
@@ -82,6 +92,30 @@ export function Menu() {
     <div
       className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center z-50 ${isMenuHidden ? "opacity-0 invisible" : "opacity-100 visible"} transition duration-300 ease-in-out`}
     >
+      {gpuWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="rounded-xl bg-zinc-900 p-6 text-white">
+            <h2 className="text-xl font-bold">Integrated GPU detected</h2>
+
+            <p className="mt-3">
+              Your browser appears to be using:
+              <br />
+              {gpuWarning}
+            </p>
+
+            <p className="mt-3 text-sm text-zinc-400">
+              Try enabling your dedicated GPU in Windows Graphics Settings.
+            </p>
+
+            <button
+              onClick={() => dispatch(setGpuWarning(""))}
+              className="mt-4 rounded-lg bg-white px-4 py-2 text-black"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
       <div className="absolute top-[15%]">
         <h1
           className={`text-white text-[96px] font-pinyon [text-shadow:0_4px_8px_rgba(42,14,16,0.8)]`}
@@ -129,26 +163,54 @@ export function Menu() {
               </h2>
 
               <div className="flex flex-col gap-8 z-10 flex-1 min-h-0 overflow-y-auto pr-3 [scrollbar-width:thin] [scrollbar-color:rgba(249,228,183,0.4)_transparent]">
-                <section className="flex flex-col gap-4" aria-labelledby="graphics-heading">
-                  <h3 id="graphics-heading" className={`text-[24px] ${serifFont} uppercase font-bold tracking-widest border-b border-play-button/20 pb-2 mb-2 text-white/90`}>
+                <section
+                  className="flex flex-col gap-4"
+                  aria-labelledby="graphics-heading"
+                >
+                  <h3
+                    id="graphics-heading"
+                    className={`text-[24px] ${serifFont} uppercase font-bold tracking-widest border-b border-play-button/20 pb-2 mb-2 text-white/90`}
+                  >
                     {t("settings.graphics.title")}
                   </h3>
                   <div className="flex justify-between items-center gap-4">
-                    <label htmlFor="graphics-quality" className={`${serifFont} text-[18px] tracking-wide`}>
+                    <label
+                      htmlFor="graphics-quality"
+                      className={`${serifFont} text-[18px] tracking-wide`}
+                    >
                       {t("settings.graphics.quality")}
                     </label>
-                    <select id="graphics-quality" value={graphicsQuality}
+                    <select
+                      id="graphics-quality"
+                      value={graphicsQuality}
                       onChange={(event) => {
-                        if (isGraphicsQuality(event.target.value)) dispatch(setGraphicsQuality(event.target.value));
+                        if (isGraphicsQuality(event.target.value))
+                          dispatch(setGraphicsQuality(event.target.value));
                       }}
-                      className={`w-[200px] bg-settings-button border border-play-button/30 rounded px-3 py-1 ${serifFont} text-play-button cursor-pointer focus:outline-none focus:border-play-button`}>
-                      {GRAPHICS_LEVELS.map((level) => <option key={level} value={level}>{t(`settings.graphics.levels.${level}`)}</option>)}
+                      className={`w-[200px] bg-settings-button border border-play-button/30 rounded px-3 py-1 ${serifFont} text-play-button cursor-pointer focus:outline-none focus:border-play-button`}
+                    >
+                      {GRAPHICS_LEVELS.map((level) => (
+                        <option key={level} value={level}>
+                          {t(`settings.graphics.levels.${level}`)}
+                        </option>
+                      ))}
                     </select>
                   </div>
-                  <p className="text-sm text-play-button/75">{t(`settings.graphics.descriptions.${graphicsQuality}`)}</p>
-                  <label className={`flex justify-between items-center ${serifFont} text-[18px]`}>
+                  <p className="text-sm text-play-button/75">
+                    {t(`settings.graphics.descriptions.${graphicsQuality}`)}
+                  </p>
+                  <label
+                    className={`flex justify-between items-center ${serifFont} text-[18px]`}
+                  >
                     {t("settings.graphics.showFps")}
-                    <input type="checkbox" checked={showFps} onChange={(event) => dispatch(setShowFps(event.target.checked))} className="h-4 w-4 accent-play-button" />
+                    <input
+                      type="checkbox"
+                      checked={showFps}
+                      onChange={(event) =>
+                        dispatch(setShowFps(event.target.checked))
+                      }
+                      className="h-4 w-4 accent-play-button"
+                    />
                   </label>
                 </section>
                 <div className="flex flex-col gap-4">
@@ -234,7 +296,11 @@ export function Menu() {
                       max="100"
                       value={voiceEffectsVolume}
                       onChange={(e) =>
-                        dispatch(setVoiceEffectsVolume({ voiceEffectsVolume: Number(e.target.value) }))
+                        dispatch(
+                          setVoiceEffectsVolume({
+                            voiceEffectsVolume: Number(e.target.value),
+                          }),
+                        )
                       }
                       className="w-[200px] h-1 bg-play-button/20 rounded-lg appearance-none cursor-pointer accent-play-button"
                     />

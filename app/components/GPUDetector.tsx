@@ -1,16 +1,13 @@
 "use client";
+import { useAppDispatch } from "@/store/hooks";
+import { setGpuWarning } from "@/store/settingsSlice";
 import { useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 
-interface GPUDetectorProps {
-  onIntegratedGPU: (gpuName: string) => void;
-}
 
-export function GPUDetector({
-  onIntegratedGPU,
-}: GPUDetectorProps) {
+export function GPUDetector() {
   const { gl } = useThree();
-
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const context = gl.getContext();
 
@@ -33,9 +30,9 @@ export function GPUDetector({
       /AMD Radeon\(TM\) Graphics/i.test(gpuName);
 
     if (isIntegrated) {
-      onIntegratedGPU(gpuName);
+      dispatch(setGpuWarning(gpuName));
     }
-  }, [gl, onIntegratedGPU]);
+  }, [gl, dispatch]);
 
   return null;
 }

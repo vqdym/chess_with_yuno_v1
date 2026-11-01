@@ -35,7 +35,7 @@ export function LoadingScreen() {
       </div>
 
       <span className="text-play-button font-cinzel text-lg mt-4 tracking-widest">
-        {progress}%
+        {progress.toFixed(2)}%
       </span>
     </div>
   );

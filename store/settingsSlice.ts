@@ -14,6 +14,7 @@ interface SettingsState {
   language: Language;
   graphicsQuality: GraphicsQuality;
   showFps: boolean;
+  gpuWarning?: string;
 }
 
 const initialState: SettingsState = {
@@ -25,6 +26,7 @@ const initialState: SettingsState = {
   language: "en",
   graphicsQuality: "medium",
   showFps: false,
+  gpuWarning: undefined,
 } 
 
 const settingsSlice = createSlice({
@@ -62,8 +64,11 @@ const settingsSlice = createSlice({
     setLanguage: (state, action: PayloadAction<{ language: Language }>) => {
       state.language = action.payload.language;
     },
+    setGpuWarning: (state, action: PayloadAction<string | undefined>) => {
+      state.gpuWarning = action.payload;
+    }
   }
 })
 
-export const {setBoardTheme, setMasterVolume, setMusicVolume, setRainVolume, setVoiceEffectsVolume, hydrateSettings, setLanguage, setGraphicsQuality, setShowFps} = settingsSlice.actions;
+export const {setBoardTheme, setMasterVolume, setMusicVolume, setRainVolume, setVoiceEffectsVolume, hydrateSettings, setLanguage, setGraphicsQuality, setShowFps, setGpuWarning} = settingsSlice.actions;
 export default settingsSlice.reducer;
